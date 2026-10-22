@@ -8,8 +8,28 @@ import { stringsFor, RETURN_GREETING_SLOT } from './strings.js';
 import { bumpVisitCount, buildNextUrl, optionsFromLocation, INTRO_BRIDGE } from './bridge.js';
 import { INTRO_PACE, scheduleFor, assertPaceStandard } from './pace.js';
 import { mountArena } from './arena.js';
+import { createLoginClient } from './kolo-login.mjs';
+import { readUrls } from './urls.js';
 
-const VERSION = '0.1.0';
+function loginClient() {
+  const core = (readUrls().coreUrl || '').replace(/\/$/, '');
+  if (!core) return null;
+  return createLoginClient({ coreUrl: core });
+}
+
+/** Attach one-time ?handoff= — never put Bearer / token= in the next URL. */
+async function withHandoff(targetHref) {
+  if (!targetHref) return targetHref;
+  const kolo = loginClient();
+  if (!kolo || !kolo.getToken()) return targetHref;
+  try {
+    const r = await kolo.linkWithHandoff(targetHref);
+    if (r.status < 300 && r.data && r.data.url) return r.data.url;
+  } catch (_) {}
+  return targetHref;
+}
+
+const VERSION = '0.1.1';
 
 /** @type {{ lang: string, visit: string, next: string|null, from: string, account: string|null, reason: string|null, finished: boolean, beat: number }} */
 let state = {
@@ -84,7 +104,7 @@ function applyBeat(root, s, beatIndex) {
   root.dataset.beat = String(beatIndex);
 }
 
-function finish(reason) {
+async function finish(reason) {
   if (state.finished) return;
   state.finished = true;
   state.reason = reason;
@@ -102,12 +122,13 @@ function finish(reason) {
   bumpVisitCount(typeof localStorage !== 'undefined' ? localStorage : null);
   rememberLang(state.lang, typeof localStorage !== 'undefined' ? localStorage : null);
 
-  const url = buildNextUrl(state.next, {
+  let url = buildNextUrl(state.next, {
     lang: state.lang,
     from: state.from,
     account: state.account,
     reason
   });
+  url = await withHandoff(url);
 
   const info = {
     version: VERSION,
@@ -171,8 +192,13 @@ function armPace(s) {
  * @param {(info: object) => void} [opts.onFinish]
  * @param {boolean} [opts.autoPace] default true; false for unit/manual control
  */
-export function start(opts = {}) {
+export async function start(opts = {}) {
   assertPaceStandard();
+
+  try {
+    const kolo = loginClient();
+    if (kolo) await kolo.takeHandoffFromUrl();
+  } catch (_) {}
 
   const loc = optionsFromLocation(
     typeof location !== 'undefined' ? location.search : '',
