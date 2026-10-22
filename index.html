@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="color-scheme" content="dark"/>
+  <title>Doom World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/intro.css"/>
+  <!-- ONE place for world URLs (same keys as game1/game2/game3/intro-kolo). Local until Ivan sets production. -->
+  <script id="intro-config" type="application/json">
+  {
+    "urls": {
+      "coreUrl": "http://localhost:3000",
+      "introUrl": "http://localhost:4173/",
+      "doomIntroUrl": "http://localhost:4174/",
+      "koloWorldUrl": "http://localhost:8080/",
+      "doomUrl": "http://localhost:8090/",
+      "game1Url": "http://localhost:8123/",
+      "koloApp": { "url": "", "installUrl": "" }
+    }
+  }
+  </script>
+</head>
+<body>
+  <main class="intro" id="intro">
+    <header class="intro-top">
+      <h1 class="brand">
+        <span class="name" data-i18n="brand">Doom World</span>
+        <span class="tag" data-i18n="brandSub">doom-world</span>
+      </h1>
+      <button type="button" id="intro-skip" data-i18n="skip" aria-label="Skip intro">Skip</button>
+    </header>
+
+    <section class="intro-main">
+      <div id="holo-mount" aria-hidden="false"></div>
+      <article class="panel" aria-live="polite">
+        <p class="kh" data-i18n="sub">doom-world</p>
+        <h2 data-i18n="title">Welcome, tester</h2>
+        <span class="who" data-i18n="who">Tester briefing</span>
+        <span class="line" data-i18n="line">Short briefing.</span>
+        <p class="thought" data-i18n="thought"></p>
+        <div id="intro-progress" class="progress" role="progressbar" aria-valuemin="1" aria-valuenow="1" aria-valuemax="4" hidden></div>
+        <button type="button" id="intro-continue" data-i18n="continue">Enter</button>
+        <p id="intro-done" hidden></p>
+      </article>
+    </section>
+
+    <footer class="intro-foot">intro-doom-world · before doom arena · ~1.5–2 min · always Skip</footer>
+  </main>
+  <script type="module" src="src/intro.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "intro-doom-world",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Skippable Doom arena intro before game3-doom-world (ru|en, ~1.5–2 min first / short return)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "start": "npx --yes serve -l 4174 ."
+  }
+}

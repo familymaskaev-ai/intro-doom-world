@@ -1,0 +1,105 @@
+/**
+ * UI language = player language (ru | en), same idea as Start From Zero.
+ * Sources (first wins): ?lang=, localStorage sfz.ui / doom.ui, navigator.
+ */
+(function (global) {
+  const QS = new URLSearchParams(location.search);
+
+  function detect() {
+    const q = (QS.get("lang") || "").toLowerCase();
+    if (q === "ru" || q === "en") return q;
+    try {
+      const s = localStorage.getItem("sfz.ui") || localStorage.getItem("doom.ui");
+      if (s === "ru" || s === "en") return s;
+    } catch (_) {}
+    return /^(ru|uk|be|kk)/i.test(navigator.language || "") ? "ru" : "en";
+  }
+
+  let UI = detect();
+
+  function L(en, ru) {
+    return UI === "ru" && ru != null ? ru : en;
+  }
+
+  function setUI(lang) {
+    if (lang !== "ru" && lang !== "en") return false;
+    UI = lang;
+    try {
+      localStorage.setItem("doom.ui", lang);
+      localStorage.setItem("sfz.ui", lang);
+    } catch (_) {}
+    return true;
+  }
+
+  const CAUSE = {
+    shot: { en: "shot", ru: "застрелены" },
+    eaten: { en: "eaten", ru: "съедены" },
+    burned: { en: "burned", ru: "сожжены" },
+    consumed: { en: "consumed", ru: "поглощены" },
+    unknown: { en: "fallen", ru: "пали" },
+  };
+
+  function causeLabel(cause) {
+    const c = CAUSE[cause] || CAUSE.unknown;
+    return L(c.en, c.ru);
+  }
+
+  const strings = () => ({
+    title: L("Doom World", "Мир Doom"),
+    tagline: L(
+      "One arena under the plaza — walk the halls, clear the creatures, come back alive.",
+      "Одна арена под площадью — пройдите залы, зачистите тварей, вернитесь живыми."
+    ),
+    start: L("Enter", "Войти"),
+    skip: L("Skip", "Пропустить"),
+    greetFirstTitle: L("Welcome, tester", "Добро пожаловать, тестер"),
+    greetFirst: L(
+      "Short briefing: ten lives, original foes, weapons from your Kolo account. Skip when ready.",
+      "Коротко: десять жизней, свои враги, оружие с аккаунта Коло. Пропустите, когда готовы."
+    ),
+    greetReturnTitle: L("Back again", "Снова здесь"),
+    greetReturn: L(
+      "Welcome back. Same arena, your lives and XP wait on the account. Skip to play.",
+      "С возвращением. Та же арена — жизни и XP на аккаунте. Пропустите, чтобы играть."
+    ),
+    clickLook: L("Click to look around", "Нажмите, чтобы смотреть"),
+    hint: L(
+      "WASD — move · mouse — look · click / Space — shoot · 1–0 / scroll — weapon · P — special-save · Esc — release mouse",
+      "WASD — ходьба · мышь — взгляд · клик / пробел — выстрел · 1–0 / колёсико — оружие · P — special-save · Esc — отпустить мышь"
+    ),
+    health: L("Health", "Здоровье"),
+    ammo: L("Ammo", "Патроны"),
+    kills: L("Cleared", "Зачищено"),
+    lives: L("Lives", "Жизни"),
+    xp: L("XP", "Опыт"),
+    weapon: L("Weapon", "Оружие"),
+    returnBtn: L("Back to Start From Zero", "Вернуться в Start From Zero"),
+    returning: L("Returning…", "Возврат…"),
+    returnOk: L("Opening Start From Zero…", "Открываем Start From Zero…"),
+    returnNoAnchor: L(
+      "No glasses point yet — Start From Zero will begin from the start ($200).",
+      "Точки очков ещё нет — Start From Zero начнётся сначала ($200)."
+    ),
+    returnBusy: L(
+      "You are marked as being in another game. Left that session and retry.",
+      "Вы отмечены как находящиеся в другой игре. Выйдите оттуда и попробуйте снова."
+    ),
+    returnFail: L(
+      "Could not reach Kolo core. Opening Start From Zero without a live session.",
+      "Не удалось связаться с ядром Коло. Открываем Start From Zero без живой сессии."
+    ),
+    win: L("Arena cleared. Keep testing or go back.", "Арена зачищена. Можно дальше тестировать или вернуться."),
+    dead: L("You fell.", "Вы пали."),
+    deadCause: (cause) =>
+      L(`You were ${causeLabel(cause)}.`, `Вас ${causeLabel(cause)}.`),
+    wiped: L(
+      "Ten deaths — Doom progress reset. Special-save weapons kept.",
+      "Десять смертей — прогресс Doom сброшен. Special-save оружие сохранено."
+    ),
+    retry: L("Try again", "Ещё раз"),
+    fire: L("FIRE", "ОГОНЬ"),
+    enemy: L("Foe", "Враг"),
+  });
+
+  global.DoomI18n = { get UI() { return UI; }, L, setUI, strings, detect, causeLabel };
+})(window);
