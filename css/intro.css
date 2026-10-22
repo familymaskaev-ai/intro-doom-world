@@ -1,0 +1,334 @@
+/* Intro before Doom arena — warm stone / ember corridor (not purple glow dashboard). */
+
+:root {
+  --bg0: #100a08;
+  --bg1: #241610;
+  --ember: #e87840;
+  --gold: #e8c278;
+  --ink: #f3ebe4;
+  --muted: #b8a090;
+  --f-display: "Barlow Condensed", "Roboto Condensed", sans-serif;
+  --f-body: "Source Sans 3", "Source Sans Pro", "Segoe UI", sans-serif;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--ink);
+  font-family: var(--f-body);
+  background:
+    radial-gradient(110% 70% at 50% 115%, rgba(232, 120, 64, 0.22), transparent 55%),
+    radial-gradient(60% 45% at 50% -5%, rgba(255, 180, 90, 0.1), transparent 50%),
+    linear-gradient(180deg, var(--bg1) 0%, var(--bg0) 55%, #070504 100%);
+  background-attachment: fixed;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+.intro {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding:
+    calc(16px + var(--safe-t))
+    calc(20px + var(--safe-r))
+    calc(20px + var(--safe-b))
+    calc(20px + var(--safe-l));
+  gap: 12px;
+}
+
+.intro-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 2;
+}
+
+.brand { margin: 0; line-height: 0.95; }
+
+.brand .name {
+  display: block;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: clamp(40px, 9vw, 72px);
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 0 22px rgba(232, 120, 64, 0.28);
+}
+
+.brand .tag {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--f-display);
+  font-size: clamp(13px, 2.4vw, 16px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+  max-width: min(52ch, 70vw);
+}
+
+#intro-skip {
+  appearance: none;
+  cursor: pointer;
+  font-family: var(--f-display);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1b1408;
+  background: linear-gradient(#ffe08a, #f2b53c);
+  border: 2px solid #fff4d0;
+  border-radius: 12px;
+  padding: 8px 14px;
+  flex: 0 0 auto;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+#intro-skip:hover { transform: translateY(-1px); }
+#intro-skip.go { opacity: 0.7; cursor: default; }
+#intro-skip:disabled { opacity: 0.65; }
+
+.intro-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: end;
+  gap: 20px;
+  z-index: 1;
+}
+
+@media (min-width: 820px) {
+  .intro-main {
+    grid-template-columns: minmax(220px, 0.9fr) minmax(280px, 1.1fr);
+    align-items: center;
+    gap: 40px;
+  }
+}
+
+#holo-mount {
+  display: grid;
+  place-items: end center;
+  min-height: min(46vh, 420px);
+}
+
+.holo-stage {
+  position: relative;
+  width: min(260px, 58vw);
+  height: min(400px, 52vh);
+  animation: holoIn 0.9s ease-out both;
+}
+
+.holo-pedestal {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 62%;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 140, 70, 0.55), transparent 70%);
+  filter: blur(1px);
+}
+
+.holo-beam, .arena-beam {
+  position: absolute;
+  inset: 8% 18% 10%;
+  background: linear-gradient(180deg, rgba(232, 120, 64, 0.0), rgba(232, 120, 64, 0.14) 40%, rgba(232, 120, 64, 0.02));
+  clip-path: polygon(42% 0, 58% 0, 92% 100%, 8% 100%);
+  pointer-events: none;
+  animation: beamPulse 3.2s ease-in-out infinite;
+}
+
+.holo-figure {
+  position: absolute;
+  inset: 0 8% 6%;
+  display: grid;
+  place-items: center;
+}
+
+.holo-svg {
+  width: 100%;
+  height: 100%;
+  animation: holoDrift 4.5s ease-in-out infinite;
+}
+
+.holo-scan { animation: scanShift 2.8s linear infinite; }
+
+.holo-flicker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 180, 120, 0.07) 48%,
+    transparent 52%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  animation: flicker 0.12s steps(2) infinite, scanMove 2.4s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.7;
+}
+
+.panel {
+  width: min(430px, 100%);
+  justify-self: center;
+  padding: 16px 18px 18px;
+  color: var(--ink);
+  background: linear-gradient(160deg, rgba(28, 16, 12, 0.94), rgba(36, 22, 16, 0.9));
+  border: 1px solid rgba(255, 180, 100, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  animation: panelIn 0.55s ease-out 0.25s both;
+}
+
+@media (min-width: 820px) {
+  .panel { justify-self: start; }
+}
+
+.panel .kh {
+  font-family: var(--f-display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 6px;
+}
+
+.panel h2 {
+  margin: 0 0 4px;
+  font-family: var(--f-display);
+  font-size: clamp(26px, 5vw, 32px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.panel .who {
+  display: block;
+  font-family: var(--f-display);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 4px;
+}
+
+.panel .line {
+  display: block;
+  font-family: var(--f-display);
+  font-size: clamp(18px, 3.2vw, 22px);
+  line-height: 1.3;
+  color: #fff;
+  margin: 0 0 10px;
+}
+
+.panel .thought {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.progress {
+  height: 4px;
+  margin: 0 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.progress::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: calc(var(--p, 0.25) * 100%);
+  background: linear-gradient(90deg, #f2b53c, #ffe08a);
+  transition: width 0.35s ease;
+}
+
+#intro-continue {
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+  font-family: var(--f-display);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1a0c08;
+  background: linear-gradient(#ffc078, #e87840);
+  border: 2px solid #ffe0b8;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+#intro-continue:disabled { opacity: 0.6; cursor: default; }
+
+#intro-done {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.intro-foot {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(184, 160, 144, 0.75);
+  text-align: center;
+}
+
+html.intro-leaving .intro {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+@keyframes holoIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes holoDrift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes beamPulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+}
+
+@keyframes scanShift {
+  from { transform: translateY(0); }
+  to { transform: translateY(6px); }
+}
+
+@keyframes scanMove {
+  from { background-position: 0 0; }
+  to { background-position: 0 100%; }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-stage, .panel, .holo-svg, .holo-beam, .holo-scan, .holo-flicker {
+    animation: none !important;
+  }
+}

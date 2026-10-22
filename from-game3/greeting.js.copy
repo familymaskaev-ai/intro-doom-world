@@ -1,0 +1,73 @@
+/**
+ * Short skippable greetings: first visit vs return. Language ru|en via DoomI18n.
+ */
+(function (global) {
+  let active = false;
+  let onDone = null;
+
+  function els() {
+    return {
+      root: document.getElementById("greeting"),
+      title: document.getElementById("greeting-title"),
+      text: document.getElementById("greeting-text"),
+      skip: document.getElementById("greeting-skip"),
+    };
+  }
+
+  function show(done) {
+    onDone = done;
+    const S = DoomI18n.strings();
+    const ret = DoomProgress.isReturnVisit();
+    const { root, title, text, skip } = els();
+    if (!root) {
+      if (typeof done === "function") done();
+      return;
+    }
+    title.textContent = ret ? S.greetReturnTitle : S.greetFirstTitle;
+    text.textContent = ret ? S.greetReturn : S.greetFirst;
+    skip.textContent = S.skip;
+    root.classList.remove("hidden");
+    root.setAttribute("aria-hidden", "false");
+    active = true;
+  }
+
+  function finish() {
+    if (!active) return;
+    active = false;
+    const { root } = els();
+    if (root) {
+      root.classList.add("hidden");
+      root.setAttribute("aria-hidden", "true");
+    }
+    DoomProgress.markVisited();
+    const cb = onDone;
+    onDone = null;
+    if (typeof cb === "function") cb();
+  }
+
+  function bind() {
+    const { root, skip } = els();
+    if (!root) return;
+    skip.addEventListener("click", (e) => {
+      e.preventDefault();
+      finish();
+    });
+    root.addEventListener("keydown", (e) => {
+      if (!active) return;
+      if (e.code === "Space" || e.code === "Enter" || e.code === "Escape") {
+        e.preventDefault();
+        finish();
+      }
+    });
+    // Click anywhere on the greeting panel to skip.
+    root.addEventListener("click", (e) => {
+      if (!active) return;
+      if (e.target === skip || e.target.closest("#greeting-skip")) return;
+      // Only skip when clicking the backdrop / card empty area via skip button preferred;
+      // Space/Enter/skip handle primary path. Extra: click card also skips.
+      if (e.target.closest(".greeting-card") || e.target === root) finish();
+    });
+  }
+
+  global.DoomGreeting = { show, finish, bind, get active() { return active; } };
+})(window);
