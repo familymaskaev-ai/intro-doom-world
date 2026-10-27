@@ -18,6 +18,11 @@
  * Without `service` the login is the Kolo app with full access, as before 1.6.0.
  * A portal passes the TARGET service: linkWithHandoff(url, { service: "doom-world" }).
  *
+ * Login in a cookie (contract 1.6.19, Б6): createLoginClient({ coreUrl, cookie: true }) — the core keeps the
+ * login in an HttpOnly cookie (one per service) that page scripts cannot read; this library then stores only
+ * a "signed in" mark, never the token. Needs the core on the same site (same host at home, *.maskaevcity.com
+ * outside). Without `cookie` everything works as before (Bearer token in storage).
+ *
  * Invites (contract 1.6.16): a personal link ?invite=<secret> is taken by takeHandoffFromUrl(),
  * removed from the address bar, kept in this origin's storage ("kolo.invite") and sent with start().
  * When the core runs invite-only, a closed number gets 403 {error:"registration_closed", message, messageRu}.
@@ -45,15 +50,20 @@ export function createLoginClient(opts) {
   const doFetch = opts.fetch ?? fetch;
   // Which service this client is (contract 1.6.0). Undefined = the Kolo app (full access).
   const service = opts.service || undefined;
+  // Б6 (1.6.19): the login lives in an HttpOnly cookie; storage keeps only a "signed in" mark
+  const cookieMode = opts.cookie === true;
+  const markKey = `kolo.session.${service || "app"}`;
 
   async function api(method, path, body, token) {
     const headers = {};
     if (body !== undefined) headers["content-type"] = "application/json";
-    if (token) headers.authorization = `Bearer ${token}`;
+    if (cookieMode) headers["x-kolo-service"] = service || "app";
+    else if (token) headers.authorization = `Bearer ${token}`;
     const res = await doFetch(coreUrl + path, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      ...(cookieMode ? { credentials: "include" } : {}),
     });
     let data = null;
     try {
@@ -64,10 +74,11 @@ export function createLoginClient(opts) {
     return { status: res.status, data };
   }
 
+  /** The Bearer token; in cookie mode only the mark "cookie" (the real login is out of reach of scripts). */
   function getToken() {
     if (!storage) return null;
     try {
-      const t = storage.getItem(storageKey);
+      const t = storage.getItem(cookieMode ? markKey : storageKey);
       return t && t.length ? t : null;
     } catch {
       return null;
@@ -77,7 +88,10 @@ export function createLoginClient(opts) {
   function setToken(token) {
     if (!storage) return;
     try {
-      if (token) storage.setItem(storageKey, token);
+      if (cookieMode) {
+        if (token) storage.setItem(markKey, "cookie");
+        else storage.removeItem(markKey);
+      } else if (token) storage.setItem(storageKey, token);
       else storage.removeItem(storageKey);
     } catch {
       /* private mode / quota */
@@ -145,8 +159,9 @@ export function createLoginClient(opts) {
       if (service) body.service = service;
       const secret = invite || getInvite();
       if (secret) body.invite = secret;
+      if (cookieMode) body.cookie = true;
       const r = await api("POST", "/auth/start", body);
-      if (r.status < 300 && r.data?.token) setToken(r.data.token);
+      if (r.status < 300 && (r.data?.token || r.data?.cookie)) setToken(r.data.token ?? "cookie");
       return r;
     },
 
@@ -154,8 +169,9 @@ export function createLoginClient(opts) {
     async verify(phone, code) {
       const body = { phone, code };
       if (service) body.service = service;
+      if (cookieMode) body.cookie = true;
       const r = await api("POST", "/auth/verify", body);
-      if (r.status < 300 && r.data?.token) setToken(r.data.token);
+      if (r.status < 300 && (r.data?.token || r.data?.cookie)) setToken(r.data.token ?? "cookie");
       return r;
     },
 
@@ -237,8 +253,8 @@ export function createLoginClient(opts) {
      * Stores the new token on success.
      */
     async consumeHandoff(code) {
-      const r = await api("POST", "/auth/handoff/consume", { code });
-      if (r.status < 300 && r.data?.token) setToken(r.data.token);
+      const r = await api("POST", "/auth/handoff/consume", cookieMode ? { code, cookie: true } : { code });
+      if (r.status < 300 && (r.data?.token || r.data?.cookie)) setToken(r.data.token ?? "cookie");
       return r;
     },
 
