@@ -30,3 +30,11 @@ test('kolo-login.mjs ships handoff endpoints', async () => {
   assert.match(js, /linkWithHandoff/);
   assert.match(js, /takeHandoffFromUrl/);
 });
+
+// Б6 (core 1.6.19): the intro keeps the login in the core's cookie, never a Bearer in storage
+test('intro signs in with the core cookie and drops an old kolo.token', async () => {
+  const js = await readFile(join(ROOT, 'src/intro.js'), 'utf8');
+  assert.match(js, /createLoginClient\(\{ coreUrl: core, service: 'doom-world', cookie: true \}\)/);
+  assert.match(js, /removeItem\('kolo.token'\)/);
+  assert.match(js, /await dropOldLogin\(\);\s*const kolo = loginClient\(\);/);
+});

@@ -14,7 +14,26 @@ import { readUrls } from './urls.js';
 function loginClient() {
   const core = (readUrls().coreUrl || '').replace(/\/$/, '');
   if (!core) return null;
-  return createLoginClient({ coreUrl: core });
+  // Б6 (core 1.6.19): the login lives in the core's HttpOnly cookie, storage keeps only a "signed in" mark
+  return createLoginClient({ coreUrl: core, service: 'doom-world', cookie: true });
+}
+
+/** Б6: a 30-day Bearer left in storage by older versions is closed on the core and forgotten. */
+async function dropOldLogin() {
+  let old = null;
+  try { old = localStorage.getItem('kolo.token'); } catch (_) {}
+  if (!old) return;
+  const core = (readUrls().coreUrl || '').replace(/\/$/, '');
+  if (core) {
+    try {
+      await fetch(`${core}/auth/logout`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${old}` },
+        body: '{}'
+      });
+    } catch (_) {}
+  }
+  try { localStorage.removeItem('kolo.token'); } catch (_) {}
 }
 
 /** Attach one-time ?handoff= — never put Bearer / token= in the next URL. */
@@ -198,6 +217,7 @@ export async function start(opts = {}) {
   assertPaceStandard();
 
   try {
+    await dropOldLogin();
     const kolo = loginClient();
     if (kolo) await kolo.takeHandoffFromUrl();
   } catch (_) {}
