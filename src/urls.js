@@ -18,6 +18,32 @@ function pick(v) {
   return typeof v === 'string' && v.trim() ? v.trim() : '';
 }
 
+// Home Wi-Fi: the addresses say localhost (= the Mac), but a phone opened the intro by the Mac's name
+// (MacBook-Air-Ivan.local or 192.168.x.x). There localhost would be the phone itself, so use the page's own host; the port stays.
+const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\])$/;
+const pageHost = () => (typeof location !== 'undefined' && location.hostname) || '';
+
+export function onThisMac(raw, here = pageHost()) {
+  if (!raw || !here || LOOPBACK.test(here)) return raw;
+  try {
+    const u = new URL(raw);
+    if (!LOOPBACK.test(u.hostname)) return raw;
+    u.hostname = here;
+    return /\/$/.test(raw) ? u.href : u.href.replace(/\/$/, '');
+  } catch (_) {
+    return raw;
+  }
+}
+
+export function macUrls(o, here = pageHost()) {
+  const out = { ...o };
+  for (const k of ['coreUrl', 'introUrl', 'doomIntroUrl', 'koloWorldUrl', 'doomUrl', 'game1Url']) {
+    if (k in o) out[k] = onThisMac(o[k], here);
+  }
+  out.koloApp = { url: onThisMac(o.koloApp.url, here), installUrl: onThisMac(o.koloApp.installUrl, here) };
+  return out;
+}
+
 /**
  * @param {Document | { getElementById?: Function }} [doc]
  * @param {typeof DEFAULT_URLS} [defaults]
@@ -37,7 +63,7 @@ export function readUrls(doc = typeof document !== 'undefined' ? document : null
   };
   try {
     const el = doc && doc.getElementById && doc.getElementById('intro-config');
-    if (!el) return out;
+    if (!el) return macUrls(out);
     const d = JSON.parse(el.textContent || '{}');
     const u = d.urls || {};
     if (pick(u.coreUrl)) out.coreUrl = pick(u.coreUrl);
@@ -50,5 +76,5 @@ export function readUrls(doc = typeof document !== 'undefined' ? document : null
     if (pick(app.url)) out.koloApp.url = pick(app.url);
     if (pick(app.installUrl)) out.koloApp.installUrl = pick(app.installUrl);
   } catch (_) { /* keep defaults */ }
-  return out;
+  return macUrls(out);
 }
