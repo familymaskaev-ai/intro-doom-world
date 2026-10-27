@@ -61,7 +61,7 @@ function clearTimers() {
   timers = [];
 }
 
-function applyBeat(root, s, beatIndex) {
+export function applyBeat(root, s, beatIndex) {
   const beat = (s.beats && s.beats[beatIndex]) || s.beats[0];
   const set = (sel, text, attr) => {
     const el = $(sel, root);
@@ -99,9 +99,11 @@ function applyBeat(root, s, beatIndex) {
     progress.style.setProperty('--p', String((beatIndex + 1) / n));
   }
 
-  root.lang = state.lang;
-  root.dataset.visit = state.visit;
-  root.dataset.beat = String(beatIndex);
+  // root is the document: lang and data-* live on <html> (document.dataset does not exist)
+  const html = root.documentElement || root;
+  html.lang = state.lang;
+  html.dataset.visit = state.visit;
+  html.dataset.beat = String(beatIndex);
 }
 
 async function finish(reason) {
