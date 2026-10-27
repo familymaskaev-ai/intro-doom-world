@@ -6,6 +6,7 @@
 
 ## Сделано
 
+- **П11 (27.10): запуск без интернета.** `npm start` → `node scripts/serve.mjs . 4174` (копия game2 `scripts/static-serve.mjs`), вместо `npx --yes serve`, который каждый раз скачивал пакет. game2 `run-mac.sh` поднимает это интро на :4174 сам.
 - **П1 (27.10): одна копия kolo-login.** Файлы `kolo-login.*` — точная копия из kolo-core (`scripts/kolo-login-sync.mjs --all`), отпечатки в `kolo-login.sha256`, тест сверяет их. Руками не править.
 - Пропускаемое интро перед ареной Doom (паттерн intro-kolo-world).
 - Тексты first/return из game3 `@ c045dc3` → `src/strings.js` + `from-game3/*.copy`.
