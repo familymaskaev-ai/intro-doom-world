@@ -6,6 +6,7 @@
 
 ## Сделано
 
+- **П1 (27.10): одна копия kolo-login.** Файлы `kolo-login.*` — точная копия из kolo-core (`scripts/kolo-login-sync.mjs --all`), отпечатки в `kolo-login.sha256`, тест сверяет их. Руками не править.
 - Пропускаемое интро перед ареной Doom (паттерн intro-kolo-world).
 - Тексты first/return из game3 `@ c045dc3` → `src/strings.js` + `from-game3/*.copy`.
 - Язык `ru` \| `en`; urls локальные (`doomIntroUrl` `:4174`, `doomUrl` `:8090`).
