@@ -19,8 +19,8 @@ export function stringsFor(lang, mode) {
 
   const greetFirstTitle = t('Welcome, tester', 'Добро пожаловать, тестер');
   const greetFirst = t(
-    'Short briefing: ten lives, original foes, weapons from your Kolo account. Skip when ready.',
-    'Коротко: десять жизней, свои враги, оружие с аккаунта Коло. Пропустите, когда готовы.'
+    'Short briefing: ten lives, original foes, weapons from your Maskaevcity account. Skip when ready.',
+    'Коротко: десять жизней, свои враги, оружие с аккаунта Maskaevcity. Пропустите, когда готовы.'
   );
   const doomTitle = t('Doom World', 'Мир Doom');
   const tagline = t(
