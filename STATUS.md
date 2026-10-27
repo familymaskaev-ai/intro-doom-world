@@ -5,6 +5,7 @@
 - **Длина:** first 1.5–2 мин (`90–120` с, цель `105` с); return ~12 с; Skip всегда
 
 ## Сделано
+- **П13 (27.10): кнопка «Пропустить» снова работает.** При запуске интро писало `data-*` в `document` вместо `<html>` и падало («Cannot set properties of undefined (setting 'visit')»), поэтому ни «Пропустить», ни автопереход дальше не срабатывали — игрок застревал в интро. Нашёл сквозной тест пути в браузере (game2 `npm run e2e`). Тест `test/apply-beat.test.mjs`.
 
 - **П12 (27.10): одинаковый CI.** Шаг «Secret scan» (`scripts/check-secrets.sh`, копия из game2), Node из `.nvmrc` (22), проверка «в main только через PR» (как в kolo-core), тест: ключи и порты блока `urls` совпадают с таблицей kolo-hub `docs/URLS.md`.
 - **П11 (27.10): запуск без интернета.** `npm start` → `node scripts/serve.mjs . 4174` (копия game2 `scripts/static-serve.mjs`), вместо `npx --yes serve`, который каждый раз скачивал пакет. game2 `run-mac.sh` поднимает это интро на :4174 сам.
