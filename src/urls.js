@@ -22,12 +22,29 @@ function pick(v) {
 // (MacBook-Air-Ivan.local or 192.168.x.x). There localhost would be the phone itself, so use the page's own host; the port stays.
 const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\])$/;
 const pageHost = () => (typeof location !== 'undefined' && location.hostname) || '';
+const pageProto = () => (typeof location !== 'undefined' && location.protocol) || '';
 
-export function onThisMac(raw, here = pageHost()) {
+// Through the internet (https, 28.10) every part has its own name next to this page's (Cloudflare tunnel,
+// game2 scripts/tunnel/config.example.yml): a home port becomes that part's https address, e.g. on
+// https://intro.maskaevcity.com «http://localhost:3000» is https://core.maskaevcity.com.
+export const PART_HOST = Object.freeze({ 3000: 'core', 8123: 'play', 8080: 'plaza', 8090: 'doom', 4173: 'intro', 4174: 'doom-intro' });
+export function onInternet(u, here) {
+  const part = PART_HOST[u.port];
+  if (!part) return '';
+  const labels = here.split('.');
+  const base = labels.length > 2 ? labels.slice(1).join('.') : here;
+  return `https://${part}.${base}${u.pathname}${u.search}`;
+}
+
+export function onThisMac(raw, here = pageHost(), proto = pageProto()) {
   if (!raw || !here || LOOPBACK.test(here)) return raw;
   try {
     const u = new URL(raw);
     if (!LOOPBACK.test(u.hostname)) return raw;
+    if (proto === 'https:') {
+      const out = onInternet(u, here);
+      return /\/$/.test(raw) || !out ? out : out.replace(/\/$/, '');
+    }
     u.hostname = here;
     return /\/$/.test(raw) ? u.href : u.href.replace(/\/$/, '');
   } catch (_) {
@@ -35,12 +52,12 @@ export function onThisMac(raw, here = pageHost()) {
   }
 }
 
-export function macUrls(o, here = pageHost()) {
+export function macUrls(o, here = pageHost(), proto = pageProto()) {
   const out = { ...o };
   for (const k of ['coreUrl', 'introUrl', 'doomIntroUrl', 'koloWorldUrl', 'doomUrl', 'game1Url']) {
-    if (k in o) out[k] = onThisMac(o[k], here);
+    if (k in o) out[k] = onThisMac(o[k], here, proto);
   }
-  out.koloApp = { url: onThisMac(o.koloApp.url, here), installUrl: onThisMac(o.koloApp.installUrl, here) };
+  out.koloApp = { url: onThisMac(o.koloApp.url, here, proto), installUrl: onThisMac(o.koloApp.installUrl, here, proto) };
   return out;
 }
 
