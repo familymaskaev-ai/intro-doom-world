@@ -1,12 +1,38 @@
 name: CI
+# Ivan 28.10: the free Actions minutes ran out — checks only on pull requests into main, only when code changed,
+# an older run of the same PR is cancelled, no matrices; a manual run from the Actions tab when needed.
+# Budget: 2000 minutes a month for the whole account.
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/**"
+      - "css/**"
+      - "scripts/**"
+      - "test/**"
+      - "from-game3/**"
+      - "index.html"
+      - "docs/**"
+      - "README.md"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
+      - ".github/workflows/**"
+  workflow_dispatch:
+  # only for the cheap guard below (one short job per merge)
   push:
     branches: [main]
-  pull_request:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
+    if: github.event_name != 'push' && github.event.pull_request.draft != true
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - name: Secret scan
@@ -23,6 +49,7 @@ jobs:
   main-only-via-pr:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     permissions:
       contents: read
       pull-requests: read
