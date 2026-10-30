@@ -7,7 +7,7 @@ import { L, rememberLang } from './i18n.js';
 import { stringsFor, RETURN_GREETING_SLOT } from './strings.js';
 import { bumpVisitCount, buildNextUrl, optionsFromLocation, INTRO_BRIDGE } from './bridge.js';
 import { INTRO_PACE, scheduleFor, assertPaceStandard } from './pace.js';
-import { mountArena } from './arena.js';
+import { mountHeroes } from './heroes.js';
 import { createLoginClient } from './kolo-login.mjs';
 import { readUrls } from './urls.js';
 
@@ -254,7 +254,8 @@ export async function start(opts = {}) {
   applyBeat(document, s, 0);
 
   const stage = $('#holo-mount');
-  if (stage && !stage.querySelector('.holo-stage')) mountArena(stage);
+  // Ivan 30.10: the heroes of Doom instead of the arena outline (arena.js stays for reference)
+  if (stage && !stage.querySelector('.holo-stage')) mountHeroes(stage, { lang: state.lang });
 
   const skip = $('#intro-skip');
   if (skip) {
