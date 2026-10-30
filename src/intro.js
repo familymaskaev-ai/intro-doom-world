@@ -63,7 +63,13 @@ let state = {
 };
 
 /** @type {(url: string) => void} */
-let navigate = (url) => { location.assign(url); };
+// Поправка 3: leaving the intro goes through the splash in the colours of the next world (kolo-ui); without it, at once
+let navigate = (url) => {
+  const K = typeof window !== 'undefined' ? window.KoloUI : null;
+  if (K && typeof K.go === 'function') K.go(url);
+  else location.assign(url);
+};
+if (typeof window !== 'undefined' && window.KoloUI && typeof window.KoloUI.arrive === 'function') window.KoloUI.arrive('doom-intro');
 
 /** @type {((info: object) => void) | null} */
 let onFinish = null;
