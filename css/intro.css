@@ -332,3 +332,72 @@ html.intro-leaving .intro {
     animation: none !important;
   }
 }
+
+/* Ivan 30.10: the heroes of this world instead of the arena outline (src/heroes.js) */
+.heroes-stage {
+  width: min(440px, 92vw);
+  height: min(400px, 50vh);
+}
+.heroes-stage .holo-pedestal { width: 78%; }
+.heroes-beam { inset: 4% 30% 10%; }
+.heroes-stage .holo-flicker {
+  -webkit-mask-image: radial-gradient(48% 50% at 50% 55%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(48% 50% at 50% 55%, #000 40%, transparent 100%);
+}
+.heroes-row {
+  position: absolute;
+  inset: 0 0 12%;
+  --gap: 52%;
+}
+@media (max-width: 520px) {
+  .heroes-row { --gap: 40%; }
+}
+.hero {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  margin: 0;
+  height: 78%;
+  aspect-ratio: 200 / 360;
+  /* the row: spread along the floor, the ones further out a little back and smaller */
+  transform: translateX(calc(-50% + var(--i) * var(--gap))) scale(0.8);
+  transform-origin: 50% 100%;
+  opacity: 0.5;
+  filter: saturate(0.55) brightness(0.75);
+  transition: transform 0.7s ease, opacity 0.7s ease, filter 0.7s ease;
+}
+.hero.on {
+  transform: translateX(calc(-50% + var(--i) * var(--gap))) scale(1);
+  opacity: 1;
+  filter: none;
+  z-index: 2;
+}
+.hero-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* the dark studio behind each picture melts into the night, only the figure stays */
+  mix-blend-mode: lighten;
+  -webkit-mask-image: radial-gradient(56% 58% at 50% 50%, #000 52%, transparent 84%);
+  mask-image: radial-gradient(56% 58% at 50% 50%, #000 52%, transparent 84%);
+  filter: contrast(1.35) brightness(0.92);
+  animation: holoDrift 4.5s ease-in-out infinite;
+}
+.hero.on .hero-art { filter: contrast(1.35) brightness(1.05) drop-shadow(0 0 14px rgba(255, 140, 70, 0.45)); }
+.hero-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  text-align: center;
+  font: 700 clamp(18px, 4.6vw, 24px) / 1 'Barlow Condensed', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffc090;
+  text-shadow: 0 0 12px rgba(255, 120, 50, 0.55);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero, .hero-art { transition: none !important; animation: none !important; }
+}
