@@ -316,8 +316,10 @@
     if (!row) return;
     let n = row.querySelector(".kui-help-own");
     const txt = S.help ? L(S.help.en, S.help.ru) : "";
-    const camTxt = S.cam ? L("Wheel or pinch: closer and further, all the way to first person. B: first / third person.",
-      "Колесо мыши или щипок: ближе и дальше, до вида от первого лица. B: первое / третье лицо.") : "";
+    // 05.11: a phone has no mouse wheel and no B key — there it speaks of two fingers only
+    const camTxt = !S.cam ? "" : phone() ? L("Pinch with two fingers: closer and further, all the way to first person.",
+      "Щипок двумя пальцами: ближе и дальше, до вида от первого лица.") : L("Wheel or pinch: closer and further, all the way to first person. B: first / third person.",
+      "Колесо мыши или щипок: ближе и дальше, до вида от первого лица. B: первое / третье лицо.");
     const all = [txt, camTxt].filter(Boolean).join(" ");
     if (!all) { if (n) n.hidden = true; return; }
     if (!n) {
@@ -656,7 +658,8 @@
     const k = "kui.hint." + S.world;
     if (LS.get(k)) return;
     LS.set(k, "1");
-    setTimeout(() => toast(L("Everything is in the menu at the top left. Wheel or pinch moves the camera.", "Всё — в меню слева вверху. Колесо мыши или щипок двигают камеру."), 6000), 2500);
+    setTimeout(() => toast(phone() ? L("Everything is in the menu at the top left. Pinch with two fingers moves the camera.", "Всё — в меню слева вверху. Щипок двумя пальцами двигает камеру.")
+      : L("Everything is in the menu at the top left. Wheel or pinch moves the camera.", "Всё — в меню слева вверху. Колесо мыши или щипок двигают камеру."), 6000), 2500);
   }
   function item(it) {
     it.to = it.to || "here";
